@@ -6,11 +6,13 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install TypeScript globally and ALL dependencies
+RUN npm install -g typescript && \
+    npm ci
 
-# Copy source code
-COPY ./ ./
+# Copy source code and TypeScript config
+COPY tsconfig.json ./
+COPY src/ ./src/
 
 # Build TypeScript code
 RUN npm run build
