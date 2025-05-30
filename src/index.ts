@@ -42,6 +42,7 @@ function getServer() {
     },
     async ({table, database}) => {
       try {
+        console.log(process.env.ENV)
         if (process.env.ENV === 'dev') {
           const connection = await mysql.createConnection(dbConfig);
           const [rows] = await connection.execute('SELECT * FROM ' + database + '.' + table + ' LIMIT 20') as any;
