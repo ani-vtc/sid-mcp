@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import { ConnectionOptions } from 'mysql2';
 import express from 'express';
 import cors from 'cors';
-
+import { anyQuery } from "../functions/queryFunctions.js";
 dotenv.config({ path: '../.env' });
 
 // Create Express app
@@ -42,12 +42,25 @@ function getServer() {
     },
     async ({table, database}) => {
       try {
-        const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute('SELECT * FROM ' + database + '.' + table + ' LIMIT 20') as any;
-        await connection.end();
-        return {
-          content: [{ type: "text", text: JSON.stringify({ rows: rows })}]
-        };
+        if (process.env.ENV === 'dev') {
+          const connection = await mysql.createConnection(dbConfig);
+          const [rows] = await connection.execute('SELECT * FROM ' + database + '.' + table + ' LIMIT 20') as any;
+          await connection.end();
+          return {
+            content: [{ type: "text", text: JSON.stringify({ rows: rows })}]
+          };
+        } else {
+          const rows = await anyQuery({
+            prj: process.env.PRJ,
+            ds: database,
+            tbl: table,
+            select: "*",
+            conditions: ["limit 20"]
+          });
+          return {
+            content: [{ type: "text", text: JSON.stringify({ rows: rows })}]
+          };
+        }
       } catch (error: any) {
         console.error('Error fetching rows:', error);
         return {
