@@ -121,15 +121,20 @@ server.tool(
 const options: StreamableHTTPServerTransportOptions = {
   sessionIdGenerator: () => crypto.randomUUID(),
   enableJsonResponse: true,
-  
 }
 
 async function main() {
-  const port = process.env.PORT || 8080;
+  const port = parseInt(process.env.PORT || '5000', 10);
   const transport = new StreamableHTTPServerTransport(options);
   await server.connect(transport);
   
-  app.listen(port, () => {
+  // Add a health check endpoint
+  app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+  });
+
+  // Listen on all interfaces
+  app.listen(port, '0.0.0.0', () => {
     console.log(`SID nav running on port ${port}`);
   });
 }
