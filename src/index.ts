@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import { ConnectionOptions } from 'mysql2';
 import express from 'express';
 import cors from 'cors';
-import { anyQuery } from "../functions/queryFunctions.js";
+import { anyQuery } from "./functions/queryFunctions.js";
 dotenv.config({ path: '../.env' });
 
 // Create Express app
