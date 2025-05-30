@@ -123,8 +123,6 @@ const options: StreamableHTTPServerTransportOptions = {
   enableJsonResponse: true,
 }
 
-
-
 async function main() {
   const port = parseInt(process.env.PORT || '5000', 10);
   const transport = new StreamableHTTPServerTransport(options);
@@ -135,10 +133,21 @@ async function main() {
     res.status(200).send('OK');
   });
 
-  app.post('/mcp', (req, res) => {
-    console.log(req.body);
-    transport.handleRequest(req.body, res);
-    res.status(200).send('OK');
+  // Handle MCP requests
+  app.post('/mcp', async (req, res) => {
+    try {
+      await transport.handleRequest(req, res);
+    } catch (error) {
+      console.error('Error handling MCP request:', error);
+      res.status(500).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32000,
+          message: 'Internal server error'
+        },
+        id: null
+      });
+    }
   });
 
   // Listen on all interfaces
