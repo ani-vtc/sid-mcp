@@ -79,12 +79,24 @@ function getServer() {
       }, 
       async ({database}) => {
           try {
+            if (process.env.ENV === 'dev') {
               const connection = await mysql.createConnection(dbConfig);
               const [rows] = await connection.execute('SHOW TABLES IN ' + database) as any;
               await connection.end();
               return {
                   content: [{ type: "text", text: JSON.stringify({ tables: rows })}]
               };
+            } else {
+              const rows = await anyQuery({
+                prj: process.env.PRJ,
+                ds: database,
+                select: "*",
+                conditions: ["SHOW TABLES"]
+              });
+              return {
+                content: [{ type: "text", text: JSON.stringify({ tables: rows })}]
+              };
+            }
           } catch (error: any) {
               console.error('Error fetching tables:', error);
               return {
@@ -105,10 +117,11 @@ function getServer() {
       },
       async () => {
         try {
-          const connection = await mysql.createConnection(dbConfig);
-          const [rows] = await connection.execute('SHOW DATABASES') as any;
-          await connection.end();
-          if (!rows || rows.length === 0) {
+          if (process.env.ENV === 'dev') {
+            const connection = await mysql.createConnection(dbConfig);
+            const [rows] = await connection.execute('SHOW DATABASES') as any;
+            await connection.end();
+            if (!rows || rows.length === 0) {
             return {
               content: [{
                 type: "text",
@@ -121,7 +134,20 @@ function getServer() {
               type: "text",
               text: JSON.stringify({ databases: rows })
             }]
-          };
+          }; 
+          } else {
+            const rows = await anyQuery({
+              prj: process.env.PRJ,
+              select: "*",
+              conditions: ["SHOW DATABASES"]
+            });
+            return {
+              content: [{
+                type: "text",
+                text: JSON.stringify({ databases: rows })
+              }]
+            };
+          }
         } catch (error: any) {
           console.error('Error fetching databases:', error);
           return {
