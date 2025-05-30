@@ -43,14 +43,14 @@ function getServer() {
     async ({table, database}) => {
       try {
         console.log(process.env.ENV)
-        // if (process.env.ENV === 'dev') {
-        //   const connection = await mysql.createConnection(dbConfig);
-        //   const [rows] = await connection.execute('SELECT * FROM ' + database + '.' + table + ' LIMIT 20') as any;
-        //   await connection.end();
-        //   return {
-        //     content: [{ type: "text", text: JSON.stringify({ rows: rows })}]
-        //   };
-        // } else {
+        if (process.env.ENV === 'dev') {
+          const connection = await mysql.createConnection(dbConfig);
+          const [rows] = await connection.execute('SELECT * FROM ' + database + '.' + table + ' LIMIT 20') as any;
+          await connection.end();
+          return {
+            content: [{ type: "text", text: JSON.stringify({ rows: rows })}]
+          };
+        } else {
           const rows = await anyQuery({
             prj: process.env.PRJ,
             ds: database,
@@ -61,7 +61,7 @@ function getServer() {
           return {
             content: [{ type: "text", text: JSON.stringify({ rows: rows })}]
           };
-        //}
+        }
       } catch (error: any) {
         console.error('Error fetching rows:', error);
         return {
