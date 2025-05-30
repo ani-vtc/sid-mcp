@@ -123,6 +123,8 @@ const options: StreamableHTTPServerTransportOptions = {
   enableJsonResponse: true,
 }
 
+
+
 async function main() {
   const port = parseInt(process.env.PORT || '5000', 10);
   const transport = new StreamableHTTPServerTransport(options);
@@ -130,6 +132,12 @@ async function main() {
   
   // Add a health check endpoint
   app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+  });
+
+  app.post('/mcp', (req, res) => {
+    console.log(req.body);
+    transport.handleRequest(req.body, res);
     res.status(200).send('OK');
   });
 
