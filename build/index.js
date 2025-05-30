@@ -1,10 +1,15 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
-import path from 'path';
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+import express from 'express';
+import cors from 'cors';
+dotenv.config({ path: '../.env' });
+// Create Express app
+const app = express();
+app.use(cors());
+app.use(express.json());
 // Create server instance
 const server = new McpServer({
     name: "sid-mcp",
@@ -17,8 +22,8 @@ const server = new McpServer({
 const dbConfig = {
     host: process.env.DB_HOST || '127.0.0.1',
     port: parseInt(process.env.DB_PORT || '3306'),
-    user: process.env.DB_USER || 'admin',
-    password: process.env.DB_PASSWORD || '49-visthinkCo-123!',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
 };
 //MCP SERVER TOOLS
 server.tool("getFirst20Rows", "Get the first 20 rows of a table", {
@@ -93,10 +98,17 @@ server.tool("getDatabases", "Get the list of databases on the server", {
         };
     }
 });
+const options = {
+    sessionIdGenerator: () => crypto.randomUUID(),
+    enableJsonResponse: true,
+};
 async function main() {
-    const transport = new StdioServerTransport();
+    const port = process.env.PORT || 8080;
+    const transport = new StreamableHTTPServerTransport(options);
     await server.connect(transport);
-    console.error("SID nav running on stdio");
+    app.listen(port, () => {
+        console.log(`SID nav running on port ${port}`);
+    });
 }
 main().catch((error) => {
     console.error("Fatal error in main():", error);

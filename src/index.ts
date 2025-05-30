@@ -1,5 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { HttpServerTransport } from "@modelcontextprotocol/sdk/server/http.js";
+import { StreamableHTTPServerTransport, StreamableHTTPServerTransportOptions } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
@@ -7,7 +7,7 @@ import { ConnectionOptions } from 'mysql2';
 import path from 'path';
 import express from 'express';
 import cors from 'cors';
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: '../.env' });
 
 // Create Express app
 const app = express();
@@ -27,8 +27,8 @@ const server = new McpServer({
 const dbConfig: ConnectionOptions = {
     host: process.env.DB_HOST || '127.0.0.1',
     port: parseInt(process.env.DB_PORT || '3306'),
-    user: process.env.DB_USER || 'admin',
-    password: process.env.DB_PASSWORD || '49-visthinkCo-123!',
+    user: process.env.DB_USER ,
+    password: process.env.DB_PASSWORD,
   };
 
 //MCP SERVER TOOLS
@@ -118,9 +118,15 @@ server.tool(
     }
   );
 
+const options: StreamableHTTPServerTransportOptions = {
+  sessionIdGenerator: () => crypto.randomUUID(),
+  enableJsonResponse: true,
+  
+}
+
 async function main() {
   const port = process.env.PORT || 8080;
-  const transport = new HttpServerTransport(app);
+  const transport = new StreamableHTTPServerTransport(options);
   await server.connect(transport);
   
   app.listen(port, () => {
