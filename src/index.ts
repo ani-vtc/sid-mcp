@@ -128,6 +128,7 @@ async function main() {
 
   // Add a health check endpoint
   app.get('/health', (req, res) => {
+    console.log(process.env.ENV)
     res.status(200).send('OK');
   });
 
@@ -140,7 +141,7 @@ async function main() {
       const server = getServer(); 
       const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
         sessionIdGenerator: undefined,
-      });
+      }); 
       
       res.on('close', () => {
         console.log('Request closed');
