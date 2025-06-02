@@ -173,9 +173,7 @@ async function main() {
   });
 
   app.post('/mcp', async (req: express.Request, res: express.Response) => {
-    // In stateless mode, create a new instance of transport and server for each request
-    // to ensure complete isolation. A single instance would cause request ID collisions
-    // when multiple clients connect concurrently.
+
     
     try {
       const server = getServer(); 

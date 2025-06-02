@@ -33,6 +33,7 @@ function getServer() {
         database: z.string().describe("The name of the database to the table belongs to"),
     }, async ({ table, database }) => {
         try {
+            console.log(process.env.ENV);
             if (process.env.ENV === 'dev') {
                 const connection = await mysql.createConnection(dbConfig);
                 const [rows] = await connection.execute('SELECT * FROM ' + database + '.' + table + ' LIMIT 20');
@@ -65,12 +66,25 @@ function getServer() {
         database: z.string().describe("The name of the database to get the tables from"),
     }, async ({ database }) => {
         try {
-            const connection = await mysql.createConnection(dbConfig);
-            const [rows] = await connection.execute('SHOW TABLES IN ' + database);
-            await connection.end();
-            return {
-                content: [{ type: "text", text: JSON.stringify({ tables: rows }) }]
-            };
+            if (process.env.ENV === 'dev') {
+                const connection = await mysql.createConnection(dbConfig);
+                const [rows] = await connection.execute('SHOW TABLES IN ' + database);
+                await connection.end();
+                return {
+                    content: [{ type: "text", text: JSON.stringify({ tables: rows }) }]
+                };
+            }
+            else {
+                const rows = await anyQuery({
+                    prj: process.env.PRJ,
+                    ds: database,
+                    select: "*",
+                    conditions: ["SHOW TABLES"]
+                });
+                return {
+                    content: [{ type: "text", text: JSON.stringify({ tables: rows }) }]
+                };
+            }
         }
         catch (error) {
             console.error('Error fetching tables:', error);
@@ -86,23 +100,38 @@ function getServer() {
         additionalProperties: false
     }, async () => {
         try {
-            const connection = await mysql.createConnection(dbConfig);
-            const [rows] = await connection.execute('SHOW DATABASES');
-            await connection.end();
-            if (!rows || rows.length === 0) {
+            if (process.env.ENV === 'dev') {
+                const connection = await mysql.createConnection(dbConfig);
+                const [rows] = await connection.execute('SHOW DATABASES');
+                await connection.end();
+                if (!rows || rows.length === 0) {
+                    return {
+                        content: [{
+                                type: "text",
+                                text: JSON.stringify({ error: 'No databases found' })
+                            }]
+                    };
+                }
                 return {
                     content: [{
                             type: "text",
-                            text: JSON.stringify({ error: 'No databases found' })
+                            text: JSON.stringify({ databases: rows })
                         }]
                 };
             }
-            return {
-                content: [{
-                        type: "text",
-                        text: JSON.stringify({ databases: rows })
-                    }]
-            };
+            else {
+                const rows = await anyQuery({
+                    prj: process.env.PRJ,
+                    select: "*",
+                    conditions: ["SHOW DATABASES"]
+                });
+                return {
+                    content: [{
+                            type: "text",
+                            text: JSON.stringify({ databases: rows })
+                        }]
+                };
+            }
         }
         catch (error) {
             console.error('Error fetching databases:', error);
@@ -124,9 +153,6 @@ async function main() {
         res.status(200).send('OK');
     });
     app.post('/mcp', async (req, res) => {
-        // In stateless mode, create a new instance of transport and server for each request
-        // to ensure complete isolation. A single instance would cause request ID collisions
-        // when multiple clients connect concurrently.
         try {
             const server = getServer();
             const transport = new StreamableHTTPServerTransport({
