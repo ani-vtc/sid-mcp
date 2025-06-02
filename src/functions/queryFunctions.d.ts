@@ -15,7 +15,18 @@ export function anyQuery({ prj, ds, tbl, select, conditions }?: {
     select?: string;
     conditions?: string[];
 }): Promise<Array<Object>>;
+
+/**
+ * Get tables from Google Cloud Run API
+ * @param {Object} options - Table configuration
+ * @param {string} [options.prj="magnetic-runway-428121"] - Project ID
+ * @param {string} [options.ds="schools"] - Dataset ID
+ */
+export function getTables({ prj, ds }?: {
+    prj?: string;
+    ds?: string;
+}): Promise<Array<Object>>;
 declare namespace _default {
-    export { anyQuery };
+    export { anyQuery , getTables};
 }
 export default _default;
