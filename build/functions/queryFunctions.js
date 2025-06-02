@@ -92,24 +92,24 @@ export async function getTables({ prj = "magnetic-runway-428121", ds = "schools"
                 console.error("Parent error:", error.cause);
             throw error;
         }
+        const apiResponse = await fetch(`${baseUrl}/tables/${prj}/${ds}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+            }
+        });
+        if (apiResponse.ok) {
+            const data = await apiResponse.json();
+            return data;
+        }
+        else {
+            throw new Error(`Failed to get tables: ${apiResponse.status} ${apiResponse.statusText}`);
+        }
     }
     catch (error) {
         console.error("Connection failed:", error.message);
         throw error;
-    }
-    const apiResponse = await fetch(`${baseUrl}/tables/${prj}/${ds}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`
-        }
-    });
-    if (apiResponse.ok) {
-        const data = await apiResponse.json();
-        return data;
-    }
-    else {
-        throw new Error(`Failed to get tables: ${apiResponse.status} ${apiResponse.statusText}`);
     }
 }
 export default { getTables, anyQuery };

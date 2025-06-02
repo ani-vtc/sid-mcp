@@ -5,7 +5,7 @@ import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import { anyQuery } from "./functions/queryFunctions.js";
+import { anyQuery, getTables } from "./functions/queryFunctions.js";
 dotenv.config({ path: '../.env' });
 // Create Express app
 const app = express();
@@ -75,11 +75,9 @@ function getServer() {
                 };
             }
             else {
-                const rows = await anyQuery({
+                const rows = await getTables({
                     prj: process.env.PRJ,
                     ds: database,
-                    select: "*",
-                    conditions: ["SHOW TABLES"]
                 });
                 return {
                     content: [{ type: "text", text: JSON.stringify({ tables: rows }) }]

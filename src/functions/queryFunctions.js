@@ -109,24 +109,25 @@ export async function getTables({
       throw error;
     }
   
+  
+
+    const apiResponse = await fetch(`${baseUrl}/tables/${prj}/${ds}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      } 
+    })
+
+    if (apiResponse.ok) {
+      const data = await apiResponse.json();
+      return data;
+    } else {
+      throw new Error(`Failed to get tables: ${apiResponse.status} ${apiResponse.statusText}`);
+    }
   } catch (error) {
     console.error("Connection failed:", error.message);
     throw error;
-  }
-
-  const apiResponse = await fetch(`${baseUrl}/tables/${prj}/${ds}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${idToken}`
-    }
-  })
-
-  if (apiResponse.ok) {
-    const data = await apiResponse.json();
-    return data;
-  } else {
-    throw new Error(`Failed to get tables: ${apiResponse.status} ${apiResponse.statusText}`);
   }
 }
 
