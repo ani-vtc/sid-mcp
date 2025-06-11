@@ -26,7 +26,13 @@ export function getTables({ prj, ds }?: {
     prj?: string;
     ds?: string;
 }): Promise<Array<Object>>;
+
+/**
+ * Get databases from Google Cloud Run API
+ */
+export function getDatabases(): Promise<Array<Object>>;
+
 declare namespace _default {
-    export { anyQuery , getTables};
+    export { anyQuery , getTables, getDatabases};
 }
 export default _default;
