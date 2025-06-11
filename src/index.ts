@@ -204,14 +204,15 @@ async function main() {
 
   app.get('/mcp', async (req: express.Request, res: express.Response) => {
     console.log('Received GET MCP request');
-    res.writeHead(405).end(JSON.stringify({
-      jsonrpc: "2.0",
-      error: {
-        code: -32000,
-        message: "Method not allowed."
-      },
-      id: null
-    }));
+    // res.writeHead(405).end(JSON.stringify({
+    //   jsonrpc: "2.0",
+    //   error: {
+    //     code: -32000,
+    //     message: "Method not allowed."
+    //   },
+    //   id: null
+    // }));
+    res.status(200).send('OK');
   });
 
   app.delete('/mcp', async (req: express.Request, res: express.Response) => {
