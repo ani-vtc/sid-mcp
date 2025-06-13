@@ -5,7 +5,7 @@ import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import { anyQuery, getTables } from "./functions/queryFunctions.js";
+import { anyQuery, getDatabases, getTables } from "./functions/queryFunctions.js";
 dotenv.config({ path: '../.env' });
 // Create Express app
 const app = express();
@@ -118,11 +118,7 @@ function getServer() {
                 };
             }
             else {
-                const rows = await anyQuery({
-                    prj: process.env.PRJ,
-                    select: "*",
-                    conditions: ["SHOW DATABASES"]
-                });
+                const rows = await getDatabases();
                 return {
                     content: [{
                             type: "text",
@@ -180,14 +176,15 @@ async function main() {
     });
     app.get('/mcp', async (req, res) => {
         console.log('Received GET MCP request');
-        res.writeHead(405).end(JSON.stringify({
-            jsonrpc: "2.0",
-            error: {
-                code: -32000,
-                message: "Method not allowed."
-            },
-            id: null
-        }));
+        // res.writeHead(405).end(JSON.stringify({
+        //   jsonrpc: "2.0",
+        //   error: {
+        //     code: -32000,
+        //     message: "Method not allowed."
+        //   },
+        //   id: null
+        // }));
+        res.status(200).send('OK');
     });
     app.delete('/mcp', async (req, res) => {
         console.log('Received DELETE MCP request');

@@ -137,7 +137,7 @@ export async function getTables({
   
   
 
-    const apiResponse = await fetch(`${baseUrl}/tables/${prj}/${ds}`, {
+    const apiResponse = await fetch(`${baseUrl}/tables/${ds}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
