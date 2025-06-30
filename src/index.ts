@@ -104,6 +104,58 @@ function getServer() {
       }
   );
 
+  server.tool(
+    "changeDatabase",
+    "Change the database to the one provided",
+    {
+      database: z.string().describe("The name of the database to change to"),
+    },
+    async ({database}) => {
+      if (process.env.ENV === 'dev') {
+        const connection = await mysql.createConnection(dbConfig);
+        const [rows] = await connection.execute( 'SHOW DATABASES') as any;
+        await connection.end();
+        if (!rows.includes(database)) {
+          return {
+            content: [{
+              type: "text",
+              text: JSON.stringify({ error: 'Database not found' })
+            }]
+          };
+        } 
+        return {
+          content: [{
+            type: "tool_use",
+            toolName: "changeDatabase",
+            input: {
+              database: database
+            }
+          }]
+        }
+      } else {
+        const rows = await getDatabases();
+        if (!rows.includes(database)) {
+          return {
+            content: [{
+              type: "text",
+              text: JSON.stringify({ error: 'Database not found' })
+            }]
+          };
+        } else {
+          return {
+            content: [{
+              type: "tool_use",
+              toolName: "changeDatabase",
+              input: {
+                database: database
+              }
+            }]
+          }
+        }
+      }
+    },
+  );
+
   //Get the list of databases on the server
   server.tool(
       "getDatabases",
