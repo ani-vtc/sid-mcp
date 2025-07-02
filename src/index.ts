@@ -105,106 +105,81 @@ function getServer() {
   );
 
   server.tool(
-    "changeDatabase",
-    "Change the database to the one provided",
+    "getDatabases", 
+    "Get the list of databases on the server", 
     {
-      database: z.string().describe("The name of the database to change to"),
-    },
-    async ({database}) => {
-      if (process.env.ENV === 'dev') {
-        const connection = await mysql.createConnection(dbConfig);
-        const [rows] = await connection.execute( 'SHOW DATABASES') as any;
-        await connection.end();
-        if (!rows.includes(database)) {
+        
+    }, 
+    async () => {
+      try {
+        if (process.env.ENV === 'dev') {
+          const connection = await mysql.createConnection(dbConfig);
+          const [rows] = await connection.execute('SHOW DATABASES') as any;
+          await connection.end();
+          if (!rows || rows.length === 0) {
           return {
             content: [{
               type: "text",
-              text: JSON.stringify({ error: 'Database not found' })
+              text: JSON.stringify({ error: 'No databases found' })
             }]
           };
-        } 
+        }
         return {
           content: [{
-            type: "tool_use",
-            toolName: "changeDatabase",
-            input: {
-              database: database
-            }
+            type: "text",
+            text: JSON.stringify({ databases: rows })
           }]
-        }
-      } else {
-        const rows = await getDatabases();
-        if (!rows.includes(database)) {
-          return {
-            content: [{
-              type: "text",
-              text: JSON.stringify({ error: 'Database not found' })
-            }]
-          };
+        }; 
         } else {
-          return {
-            content: [{
-              type: "tool_use",
-              toolName: "changeDatabase",
-              input: {
-                database: database
-              }
-            }]
-          }
-        }
-      }
-    },
-  );
-
-  //Get the list of databases on the server
-  server.tool(
-      "getDatabases",
-      "Get the list of databases on the server",
-      {
-        type: "object",
-        properties: {},
-        additionalProperties: false
-      },
-      async () => {
-        try {
-          if (process.env.ENV === 'dev') {
-            const connection = await mysql.createConnection(dbConfig);
-            const [rows] = await connection.execute('SHOW DATABASES') as any;
-            await connection.end();
-            if (!rows || rows.length === 0) {
-            return {
-              content: [{
-                type: "text",
-                text: JSON.stringify({ error: 'No databases found' })
-              }]
-            };
-          }
+          const rows = await getDatabases();
           return {
             content: [{
               type: "text",
               text: JSON.stringify({ databases: rows })
             }]
-          }; 
-          } else {
-            const rows = await getDatabases();
-            return {
-              content: [{
-                type: "text",
-                text: JSON.stringify({ databases: rows })
-              }]
-            };
-          }
-        } catch (error: any) {
-          console.error('Error fetching databases:', error);
-          return {
-            content: [{
-              type: "text",
-              text: JSON.stringify({ error: 'Failed to fetch databases', details: error.message})
-            }]
           };
         }
+      } catch (error: any) {
+        console.error('Error fetching databases:', error);
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ error: 'Failed to fetch databases', details: error.message})
+          }]
+        };
       }
-  );
+    }
+);
+
+server.tool(
+  "changeDatabase",
+  "Change the database selected to the one provided",
+  {
+    database: z.string().describe("The name of the database to change to"),
+  },
+  async ({database}) => {
+    try {
+      const rows = await getDatabases();
+      if (rows.includes(database)) {
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ message: 'Database changed to ' + database })
+          }]
+        }
+      } else {
+        throw new Error('Database not found');
+      }
+    } catch (error: any) {
+      console.error('Error changing database:', error);
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ error: 'Failed to change database', details: error.message })
+        }]
+      };
+    }
+  })
 
   return server;
 }
