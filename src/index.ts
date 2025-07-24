@@ -152,6 +152,24 @@ function getServer() {
 );
 
 server.tool(
+  "changeStroke",
+  "Changes Stroke Color Pallette, Stroke Weight, and what data stroke represents",
+  {
+    strokeColor: z.string().describe("The color of the stroke"),
+    strokeWeight: z.number().describe("The weight of the stroke"),
+    strokeData: z.string().describe("The data that the stroke represents"),
+  },
+  async ({strokeColor, strokeWeight, strokeData}) => {
+    return {
+      content: [{
+        type: "text",
+        text: JSON.stringify({ message: 'Stroke changed to ' + strokeColor + ' with weight ' + strokeWeight + ' and data ' + strokeData })
+      }]
+    }
+  }
+)
+
+server.tool(
   "changeDatabase",
   "Change the database selected to the one provided",
   {
