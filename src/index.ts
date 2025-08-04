@@ -152,18 +152,63 @@ function getServer() {
 );
 
 server.tool(
-  "changeStroke",
+  "setStroke",
   "Changes Stroke Color Pallette, Stroke Weight, and what data stroke represents",
   {
     strokeColor: z.string().describe("The color of the stroke"),
+    colorFlag: z.boolean().describe("Whether or not to change the color of the stroke"),
+    weightFlag: z.boolean().describe("Whether or not to change the weight of the stroke"),
     strokeWeight: z.number().describe("The weight of the stroke"),
+    dataFlag: z.boolean().describe("Whether or not to change the data that the stroke represents"),
     strokeData: z.string().describe("The data that the stroke represents"),
   },
-  async ({strokeColor, strokeWeight, strokeData}) => {
+  async ({strokeColor, colorFlag, strokeWeight, weightFlag, strokeData, dataFlag}) => {
+    let changeMessage = "";
+      if (colorFlag) {
+        changeMessage += "Color changed to " + strokeColor + " ";
+      }
+      if (weightFlag) {
+        changeMessage += "Weight changed to " + strokeWeight + " ";
+      }
+      if (dataFlag) {
+        changeMessage += "Data changed to " + strokeData + " ";
+      }
+    return {
+      
+      content: [{
+        type: "text",
+        text: JSON.stringify({ message: changeMessage})
+      }]
+    }
+  }
+)
+
+server.tool(
+  "setFill",
+  "Changes Fill Color Pallette, Fill Weight, and what data fill represents",
+  {
+    fillColor: z.string().describe("The color of the fill"),
+    colorFlag: z.boolean().describe("Whether or not to change the color of the fill"),
+    weightFlag: z.boolean().describe("Whether or not to change the weight of the fill"),
+    fillWeight: z.number().describe("The weight of the fill"),
+    dataFlag: z.boolean().describe("Whether or not to change the data that the fill represents"),
+    fillData: z.string().describe("The data that the fill represents"),
+  },
+  async ({fillColor, colorFlag, fillWeight, weightFlag, fillData, dataFlag}) => {
+    let changeMessage = "";
+      if (colorFlag) {
+        changeMessage += "Color changed to " + fillColor + " ";
+      }
+      if (weightFlag) {
+        changeMessage += "Weight changed to " + fillWeight + " ";
+      }
+      if (dataFlag) {
+        changeMessage += "Data changed to " + fillData + " ";
+      }
     return {
       content: [{
         type: "text",
-        text: JSON.stringify({ message: 'Stroke changed to ' + strokeColor + ' with weight ' + strokeWeight + ' and data ' + strokeData })
+        text: JSON.stringify({ message: changeMessage})
       }]
     }
   }
@@ -199,8 +244,27 @@ server.tool(
     }
   })
 
+  server.tool(
+    "setLatLng",
+    "Sets the latitude and longitude of the map",
+    {
+      lat: z.number().describe("The latitude of the map"),
+      lng: z.number().describe("The longitude of the map"),
+    },
+    async ({lat, lng}) => {
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ message: 'Latitude and longitude set to ' + lat + ' and ' + lng })
+        }]
+      }
+    }
+  )
+
   return server;
 }
+
+
 
 async function main() {
   const port = parseInt(process.env.PORT || '5000', 10);
