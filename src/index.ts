@@ -153,7 +153,7 @@ function getServer() {
 
 server.tool(
   "setStroke",
-  "Changes Stroke Color Pallette, Stroke Weight, and what data stroke represents",
+  "Changes Stroke Color Pallette, Stroke Weight, and/or what data stroke represents; Leave flags as false to leave them as they are",
   {
     strokeColor: z.string().describe("The color of the stroke"),
     colorFlag: z.boolean().describe("Whether or not to change the color of the stroke"),
@@ -185,7 +185,7 @@ server.tool(
 
 server.tool(
   "setFill",
-  "Changes Fill Color Pallette, Fill Weight, and what data fill represents",
+  "Changes Fill Color Pallette, Fill Weight, and/or what data fill represents; Leave flags as false to leave them as they are",
   {
     fillColor: z.string().describe("The color of the fill"),
     colorFlag: z.boolean().describe("Whether or not to change the color of the fill"),
@@ -243,6 +243,22 @@ server.tool(
       };
     }
   })
+
+  server.tool(
+    "setMapType",
+    "Sets the map type to the one provided",
+    {
+      mapType: z.string().describe("The type of map to set"),
+    },
+    async ({mapType}) => {
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ message: 'Map type set to ' + mapType })
+        }]
+      }
+    }
+  )
 
   server.tool(
     "setLatLng",
