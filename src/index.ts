@@ -262,7 +262,7 @@ server.tool(
 
   server.tool(
     "setLatLng",
-    "Sets the latitude and longitude of the map",
+    "Sets the latitude and longitude of the map; Filter for Canadian locations",
     {
       lat: z.number().describe("The latitude of the map"),
       lng: z.number().describe("The longitude of the map"),
